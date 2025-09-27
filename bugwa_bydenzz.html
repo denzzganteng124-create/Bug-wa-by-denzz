@@ -1,0 +1,160 @@
+<!doctype html>
+
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bug WhatsApp</title>
+  <style>
+    :root{--bg:#000;--neon:#39ff14;--muted:#999}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:#fff}
+    .app{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:32px}header{width:100%;text-align:center;margin-top:6px}
+.title{font-weight:700;font-size:22px;color:var(--neon);text-shadow:0 0 8px rgba(57,255,20,.15),0 0 24px rgba(57,255,20,.08);}
+
+.card{width:100%;max-width:420px;margin-top:30px;padding:28px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+input[type="text"]{width:100%;padding:12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#fff;font-size:15px}
+.row{display:flex;gap:10px;align-items:center;margin-top:14px}
+.btn{padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(90deg,#111,#222);color:#fff;font-weight:600;cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* progress screen */
+.progress-wrap{display:none;align-items:center;justify-content:center;flex-direction:column;padding:40px}
+.percent{font-size:48px;font-weight:800;letter-spacing:1px}
+.progress-bar{width:280px;height:12px;background:rgba(255,255,255,0.06);border-radius:8px;margin-top:18px;overflow:hidden}
+.progress-bar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--neon),rgba(57,255,20,0.5));box-shadow:0 0 18px rgba(57,255,20,0.16);transition:width .2s linear}
+
+/* final screen */
+.final{display:none;align-items:center;justify-content:center;flex-direction:column;padding:40px}
+.final .big{font-size:20px;font-weight:800;color:var(--neon);text-align:center}
+
+/* exit button */
+.exit-btn{position:fixed;right:14px;bottom:14px;padding:8px 10px;border-radius:8px;background:#e74c3c;color:#fff;border:0;cursor:pointer;font-weight:700}
+
+/* responsive */
+@media (max-width:420px){.card{padding:20px;margin-top:20px}}
+
+/* decorative: subtle center frame */
+.center-frame{display:flex;align-items:center;justify-content:center;min-height:60vh}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">Bug WhatsApp by denzz😈</div>
+    </header><main class="center-frame" style="width:100%">
+  <div class="card" id="screen-start">
+    <label for="phone">masukkan nomor untuk di bug</label>
+    <input id="phone" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="contoh: 081234567890" autocomplete="off" />
+    <div class="row">
+      <button id="enterBtn" class="btn">Enter</button>
+    </div>
+  </div>
+
+  <div class="card progress-wrap" id="screen-progress">
+    <div class="percent" id="percentText">0%</div>
+    <div class="progress-bar" aria-hidden="true"><i id="bar"></i></div>
+  </div>
+
+  <div class="card final" id="screen-final">
+    <div class="big">NOMOR BERHASIL DI BUG</div>
+  </div>
+</main>
+
+<button class="exit-btn" id="exitBtn" title="Exit">exit</button>
+
+  </div>  <script>
+    // --- PENTING: file ini murni simulasi visual (PRANK) dan TIDAK melakukan aksi nyata apapun terhadap nomor.
+    // Semua efek dijalankan secara lokal di browser tanpa komunikasi jaringan.
+
+    const enterBtn = document.getElementById('enterBtn');
+    const phoneIn = document.getElementById('phone');
+    const screenStart = document.getElementById('screen-start');
+    const screenProgress = document.getElementById('screen-progress');
+    const screenFinal = document.getElementById('screen-final');
+    const percentText = document.getElementById('percentText');
+    const bar = document.getElementById('bar');
+    const exitBtn = document.getElementById('exitBtn');
+
+    // Hide exit until final screen appears
+    exitBtn.style.display = 'none';
+
+    function sanitizePhone(v){
+      // remove non-digits and limit length
+      return v.replace(/\D/g,'').slice(0,20);
+    }
+
+    phoneIn.addEventListener('input', e => {
+      e.target.value = sanitizePhone(e.target.value);
+    });
+
+    enterBtn.addEventListener('click', () => {
+      // read but never send the number anywhere
+      const number = sanitizePhone(phoneIn.value || '');
+
+      // visual validation (not functional)
+      if(number.length < 6){
+        alert('Masukkan nomor yang valid (minimal 6 digit)');
+        return;
+      }
+
+      // swap screens
+      screenStart.style.display = 'none';
+      screenProgress.style.display = 'flex';
+
+      // disable inputs
+      enterBtn.disabled = true;
+      phoneIn.disabled = true;
+
+      startProgress(() => {
+        // after complete
+        screenProgress.style.display = 'none';
+        screenFinal.style.display = 'flex';
+        exitBtn.style.display = 'block';
+      });
+    });
+
+    function startProgress(doneCallback){
+      let pct = 0;
+      percentText.textContent = '0%';
+      bar.style.width = '0%';
+
+      // Use a variable interval and increments to feel "real". Total duration ~4.5s - 7s.
+      const interval = setInterval(() => {
+        // increment by 1-6%, but slow down near the end
+        const step = pct < 70 ? Math.floor(Math.random()*6)+1 : Math.floor(Math.random()*3)+1;
+        pct = Math.min(100, pct + step);
+        percentText.textContent = pct + '%';
+        bar.style.width = pct + '%';
+
+        if(pct >= 100){
+          clearInterval(interval);
+          // small pause then callback
+          setTimeout(doneCallback, 700);
+        }
+      }, Math.floor(Math.random()*120)+60);
+    }
+
+    exitBtn.addEventListener('click', () => {
+      // reset to first screen (safe, no real action taken)
+      screenFinal.style.display = 'none';
+      screenProgress.style.display = 'none';
+      screenStart.style.display = 'block';
+      enterBtn.disabled = false;
+      phoneIn.disabled = false;
+      phoneIn.value = '';
+      percentText.textContent = '0%';
+      bar.style.width = '0%';
+      exitBtn.style.display = 'none';
+    });
+
+    // allow Enter key from input
+    phoneIn.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') enterBtn.click();
+    });
+  </script></body>
+</html>
